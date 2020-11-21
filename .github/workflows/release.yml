@@ -33,13 +33,19 @@ jobs:
         env:
           TAG: ${{ steps.get_tag.outputs.TAG }}
 
+      - name: Get upload URL
+        id: get_release
+        uses: bruceadams/get-release@v1.2.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ steps.get_tag.outputs.TAG }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
           asset_path: ./asset-fetcher_${{ env.TAG }}.zip
           asset_name: my-artifact_${{ env.TAG }}.zip
           asset_content_type: application/zip

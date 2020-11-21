@@ -47,5 +47,5 @@ jobs:
         with:
           upload_url: ${{ steps.get_release.outputs.upload_url }}
           asset_path: ./asset-fetcher_${{ env.TAG }}.zip
-          asset_name: my-artifact_${{ env.TAG }}.zip
+          asset_name: asset-fetcher_${{ env.TAG }}.zip
           asset_content_type: application/zip

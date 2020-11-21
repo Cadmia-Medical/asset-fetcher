@@ -18,6 +18,10 @@ jobs:
         with:
           go-version: '^1.13.1'
 
+      - name: Get tag
+        id: get_tag
+        run: echo ::set-output name=TAG::${GITHUB_REF/refs\/tags\//}
+
       - name: Run unit tests
         run: go test ./...
 
@@ -25,15 +29,18 @@ jobs:
         run: go build
 
       - name: Zip binary
-        run: zip asset-fetcher_${{ github.ref }} asset-fetcher
+        run: zip asset-fetcher_${{ env.TAG }} asset-fetcher
+        env:
+          TAG: ${{ steps.get_tag.outputs.TAG }}
 
       - name: Create Release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.get_tag.outputs.TAG }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ env.TAG }}
+          release_name: Release ${{ env.TAG }}
           draft: false
           prerelease: false
 
@@ -41,8 +48,9 @@ jobs:
         uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.get_tag.outputs.TAG }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./asset-fetcher_${{ github.ref }}.zip
-          asset_name: my-artifact_${{ github.ref }}.zip
+          asset_path: ./asset-fetcher_${{ env.TAG }}.zip
+          asset_name: my-artifact_${{ env.TAG }}.zip
           asset_content_type: application/zip

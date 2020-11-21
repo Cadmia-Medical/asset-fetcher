@@ -23,10 +23,10 @@ func (self TestFetcher) GetAsset(path string, name string) error {
 
 func TestAssetRefresher_needsRefresh(t *testing.T) {
 	type fields struct {
-		fetcher      StaticAssetFetcher
-		assetName    string
-		localTag     string
-		downloadPath string
+		Fetcher      StaticAssetFetcher
+		AssetName    string
+		LocalTag     string
+		DownloadPath string
 	}
 	tests := []struct {
 		name       string
@@ -37,9 +37,9 @@ func TestAssetRefresher_needsRefresh(t *testing.T) {
 		{
 			name: "Tags match, do nothing",
 			fields: fields{
-				fetcher:   TestFetcher{"abc123", false},
-				assetName: "test-asset",
-				localTag:  "abc123",
+				Fetcher:   TestFetcher{"abc123", false},
+				AssetName: "test-asset",
+				LocalTag:  "abc123",
 			},
 			wasUpdated: false,
 			wantErr:    false,
@@ -47,9 +47,9 @@ func TestAssetRefresher_needsRefresh(t *testing.T) {
 		{
 			name: "Tags don't match, update assets",
 			fields: fields{
-				fetcher:   TestFetcher{"def456", false},
-				assetName: "test-asset",
-				localTag:  "abc123",
+				Fetcher:   TestFetcher{"def456", false},
+				AssetName: "test-asset",
+				LocalTag:  "abc123",
 			},
 			wasUpdated: true,
 			wantErr:    false,
@@ -58,10 +58,10 @@ func TestAssetRefresher_needsRefresh(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			self := AssetRefresher{
-				fetcher:      tt.fields.fetcher,
-				assetName:    tt.fields.assetName,
-				localTag:     tt.fields.localTag,
-				downloadPath: "/",
+				Fetcher:      tt.fields.Fetcher,
+				AssetName:    tt.fields.AssetName,
+				LocalTag:     tt.fields.LocalTag,
+				DownloadPath: "/",
 			}
 			wasUpdated, err := self.needsRefresh()
 
@@ -78,10 +78,10 @@ func TestAssetRefresher_needsRefresh(t *testing.T) {
 
 func TestAssetRefresher_pullAssets(t *testing.T) {
 	type fields struct {
-		fetcher      StaticAssetFetcher
-		assetName    string
-		localTag     string
-		downloadPath string
+		Fetcher      StaticAssetFetcher
+		AssetName    string
+		LocalTag     string
+		DownloadPath string
 	}
 	tests := []struct {
 		name    string
@@ -92,10 +92,10 @@ func TestAssetRefresher_pullAssets(t *testing.T) {
 		{
 			name: "Downloads file, updates tag",
 			fields: fields{
-				fetcher:      TestFetcher{"def456", false},
-				assetName:    "test",
-				localTag:     "abc123",
-				downloadPath: "/",
+				Fetcher:      TestFetcher{"def456", false},
+				AssetName:    "test",
+				LocalTag:     "abc123",
+				DownloadPath: "/",
 			},
 			wantErr: false,
 			newTag:  "def456",
@@ -103,10 +103,10 @@ func TestAssetRefresher_pullAssets(t *testing.T) {
 		{
 			name: "Download throws error, tag not updated",
 			fields: fields{
-				fetcher:      TestFetcher{"def456", true},
-				assetName:    "test",
-				localTag:     "abc123",
-				downloadPath: "/",
+				Fetcher:      TestFetcher{"def456", true},
+				AssetName:    "test",
+				LocalTag:     "abc123",
+				DownloadPath: "/",
 			},
 			wantErr: true,
 			newTag:  "abc123",
@@ -115,17 +115,17 @@ func TestAssetRefresher_pullAssets(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			self := &AssetRefresher{
-				fetcher:      tt.fields.fetcher,
-				assetName:    tt.fields.assetName,
-				localTag:     tt.fields.localTag,
-				downloadPath: tt.fields.downloadPath,
+				Fetcher:      tt.fields.Fetcher,
+				AssetName:    tt.fields.AssetName,
+				LocalTag:     tt.fields.LocalTag,
+				DownloadPath: tt.fields.DownloadPath,
 			}
 			if err := self.pullAssets(); (err != nil) != tt.wantErr {
 				t.Errorf("%v - AssetRefresher.pullAssets() error = %v, wantErr %v", tt.name, err, tt.wantErr)
 			}
 
-			if tt.wantErr == false && self.localTag != tt.newTag {
-				t.Errorf("%v - Asset Tag was not updated. Wanted = %v, got = %v", tt.name, tt.newTag, self.localTag)
+			if tt.wantErr == false && self.LocalTag != tt.newTag {
+				t.Errorf("%v - Asset Tag was not updated. Wanted = %v, got = %v", tt.name, tt.newTag, self.LocalTag)
 			}
 		})
 	}

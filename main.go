@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"time"
 	"log"
+	"fmt"
 
 	"gopkg.in/yaml.v2"
 	"asset-fetcher/core"
@@ -16,6 +17,7 @@ type Config struct {
 	Bucket string `yaml:"bucket"`
 	Region string `yaml:"region"`
 	DownloadPath string `yaml:"download_path"`
+	SymlinkTarget string `yaml:"symlink_target"`
 }
 
 func getConf(path string) *Config {
@@ -24,7 +26,7 @@ func getConf(path string) *Config {
     if err != nil {
         log.Fatalf("yamlFile.Get err   #%v ", err)
     }
-    err = yaml.Unmarshal(yamlFile, c)
+    err = yaml.Unmarshal(yamlFile, &c)
     if err != nil {
         log.Fatalf("Unmarshal: %v", err)
     }
@@ -50,6 +52,7 @@ func main() {
 			AssetName: name,
 			LocalTag: "",
 			DownloadPath: config.DownloadPath,
+			SymlinkTarget: config.SymlinkTarget,
 		}
 		assetFetchers = append(assetFetchers, &assetFetcher)
 	}
@@ -59,19 +62,26 @@ func main() {
 		log.Fatalf("Unable to parse refresh frequency")
 	}
 
-	go Run(&freq, assetFetchers)
+	Run(&freq, assetFetchers)
 
 }
 
 func Run(freq *time.Duration, assetFetchers []*core.AssetRefresher) {
 	ticker := time.NewTicker(*freq)
+	checkAllAssets(assetFetchers)
+
+	fmt.Println("Initializing refreshers")
 	for _ = range ticker.C {
-		for _, assetChecker := range assetFetchers {
-			err := assetChecker.Refresh()
-			if err != nil {
-				log.Fatalf("Error refreshing assets")
-			}
-		}
+		checkAllAssets(assetFetchers)
 	}
 }
 
+func checkAllAssets(assetFetchers []*core.AssetRefresher) {
+	for _, assetChecker := range assetFetchers {
+		fmt.Println("Checking asset freshness")
+		err := assetChecker.Refresh()
+		if err != nil {
+			log.Fatalf("Error refreshing assets")
+		}
+	}
+}
